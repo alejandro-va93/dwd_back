@@ -61,6 +61,11 @@ class AppointmentController extends Controller
         try {
             $appointment = new Appointment;
             $appointment->date = $request->input('date');
+            foreach (Appointment::all() as $apt) {
+                if ($apt->date == $appointment->date) {
+                    return response()->json(['status' => 'nok', 'message' => 'appointment already exists'], 400);
+                }
+            }
             $appointment->start_time = $request->input('start_time');
             $appointment->first_name = $request->input('first_name');
             $appointment->last_name = $request->input('last_name');
@@ -68,7 +73,7 @@ class AppointmentController extends Controller
             $appointment->email = $request->input('email');
             $appointment->save();
             return response()->json(
-                ['status' => 'ok', 'id' => $appointment->id], 200
+                ['status' => 'ok', 'message' => 'appointment created successfully', 'id' => $appointment->id], 200
             );
         } catch (\Throwable$th) {
             return response()->json(
@@ -86,7 +91,25 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
-        return Appointment::findOrFail($id);
+        try {
+            $appointment = Appointment::findOrFail($id);
+            $data = [
+                'id' => $appointment->id,
+                'date' => $appointment->date,
+                'start_time' => $appointment->start_time,
+                'contact_info' => [
+                    'first_name' => $appointment->first_name,
+                    'last_name' => $appointment->last_name,
+                    'email' => $appointment->email,
+                ],
+            ];
+            return response()->json([
+                'status' => 'ok',
+                'data' => $data,
+            ], 200);
+        } catch (\Throwable$th) {
+            return response()->json(['status' => 'nok'], 400);
+        }
     }
 
     /**
@@ -112,13 +135,18 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::findOrFail($id);
             $appointment->date = $request->input('date');
+            foreach (Appointment::all() as $apt) {
+                if ($apt->date == $appointment->date) {
+                    return response()->json(['status' => 'nok', 'message' => 'appointment already exists'], 400);
+                }
+            }
             $appointment->start_time = $request->input('start_time');
             $appointment->first_name = $request->input('first_name');
             $appointment->last_name = $request->input('last_name');
             $appointment->phone_number = $request->input('phone_number');
             $appointment->email = $request->input('email');
             $appointment->save();
-            return response()->json(['status' => 'ok', 'id' => $appointment->id], 200);
+            return response()->json(['status' => 'ok', 'message' => 'appointment updated successfully', 'id' => $appointment->id], 200);
 
         } catch (\Throwable$th) {
             return response()->json(['status' => 'nok'], 400);
@@ -136,9 +164,9 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::findOrFail($id);
             $appointment->delete();
-            return response()->json(['status' => 'ok'], 200);
+            return response()->json(['status' => 'ok', 'message' => 'appointmnet deleted successfully'], 200);
         } catch (\Throwable$th) {
-            //throw $th;
+            return response()->json(['status' => 'nok'], 400);
         }
     }
 }
