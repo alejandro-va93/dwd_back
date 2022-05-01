@@ -15,7 +15,11 @@ class AppointmentController extends Controller
     public function index()
     {
         try {
-            foreach (Appointment::all() as $apt) {
+            $apts = Appointment::all();
+            if ($apts->isEmpty()) {
+                return response()->json(['status' => 'ok', 'data' => []], 200);
+            }
+            foreach ($apts as $apt) {
                 $data[] = [
                     'id' => $apt->id,
                     'date' => $apt->date,
@@ -32,7 +36,7 @@ class AppointmentController extends Controller
                 'data' => $data,
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => "nok"], 400);
+            return response()->json(['status' => 'nok'], 400);
         }
     }
 
@@ -103,9 +107,22 @@ class AppointmentController extends Controller
      * @param  \App\Models\Appointment  $appointment
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Appointment $appointment)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $appointment = Appointment::findOrFail($id);
+            $appointment->date = $request->input('date');
+            $appointment->start_time = $request->input('start_time');
+            $appointment->first_name = $request->input('first_name');
+            $appointment->last_name = $request->input('last_name');
+            $appointment->phone_number = $request->input('phone_number');
+            $appointment->email = $request->input('email');
+            $appointment->save();
+            return response()->json(['status' => 'ok', 'id' => $appointment->id], 200);
+
+        } catch (\Throwable$th) {
+            return response()->json(['status' => 'nok'], 400);
+        }
     }
 
     /**
@@ -114,8 +131,14 @@ class AppointmentController extends Controller
      * @param  \App\Models\Appointment  $appointment
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Appointment $appointment)
+    public function destroy($id)
     {
-        //
+        try {
+            $appointment = Appointment::findOrFail($id);
+            $appointment->delete();
+            return response()->json(['status' => 'ok'], 200);
+        } catch (\Throwable$th) {
+            //throw $th;
+        }
     }
 }
