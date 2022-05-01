@@ -14,7 +14,26 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            foreach (Appointment::all() as $apt) {
+                $data[] = [
+                    'id' => $apt->id,
+                    'date' => $apt->date,
+                    'start_time' => $apt->start_time,
+                    'contact_info' => [
+                        'first_name' => $apt->first_name,
+                        'last_name' => $apt->last_name,
+                        'email' => $apt->email,
+                    ],
+                ];
+            }
+            return response()->json([
+                'status' => 'ok',
+                'data' => $data,
+            ], 200);
+        } catch (\Throwable$th) {
+            return response()->json(['status' => "nok"], 400);
+        }
     }
 
     /**
@@ -35,7 +54,24 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $appointment = new Appointment;
+            $appointment->date = $request->input('date');
+            $appointment->start_time = $request->input('start_time');
+            $appointment->first_name = $request->input('first_name');
+            $appointment->last_name = $request->input('last_name');
+            $appointment->phone_number = $request->input('phone_number');
+            $appointment->email = $request->input('email');
+            $appointment->save();
+            return response()->json(
+                ['status' => 'ok', 'id' => $appointment->id], 200
+            );
+        } catch (\Throwable$th) {
+            return response()->json(
+                ['status' => 'nok'], 400
+            );
+        }
+
     }
 
     /**
@@ -44,9 +80,9 @@ class AppointmentController extends Controller
      * @param  \App\Models\Appointment  $appointment
      * @return \Illuminate\Http\Response
      */
-    public function show(Appointment $appointment)
+    public function show($id)
     {
-        //
+        return Appointment::findOrFail($id);
     }
 
     /**
