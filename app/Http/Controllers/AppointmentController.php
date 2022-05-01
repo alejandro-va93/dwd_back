@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -32,6 +33,9 @@ class AppointmentController extends Controller
                 ];
             }
             return response()->json([
+                //! falta poner esto en el post y put, y que se valide que la fecha del req body sea lun-vie 9am-6pm
+                'dia_borrar' => Carbon::now()->dayOfWeek,
+                //!
                 'status' => 'ok',
                 'data' => $data,
             ], 200);
