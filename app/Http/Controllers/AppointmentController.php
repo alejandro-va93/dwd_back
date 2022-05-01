@@ -33,9 +33,6 @@ class AppointmentController extends Controller
                 ];
             }
             return response()->json([
-                //! falta poner esto en el post y put, y que se valide que la fecha del req body sea lun-vie 9am-6pm
-                'dia_borrar' => Carbon::now()->dayOfWeek,
-                //!
                 'status' => 'ok',
                 'data' => $data,
             ], 200);
@@ -69,6 +66,13 @@ class AppointmentController extends Controller
                 if ($apt->date == $appointment->date) {
                     return response()->json(['status' => 'nok', 'message' => 'appointment already exists'], 400);
                 }
+            }
+            $dayNum = Carbon::parse($appointment->date)->dayOfWeek;
+            if ($dayNum == 0 || $dayNum == 6) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'appointment day must be between Mon-Fri',
+                ], 400);
             }
             $appointment->start_time = $request->input('start_time');
             $appointment->first_name = $request->input('first_name');
@@ -143,6 +147,13 @@ class AppointmentController extends Controller
                 if ($apt->date == $appointment->date) {
                     return response()->json(['status' => 'nok', 'message' => 'appointment already exists'], 400);
                 }
+            }
+            $dayNum = Carbon::parse($appointment->date)->dayOfWeek;
+            if ($dayNum == 0 || $dayNum == 6) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'appointment day must be between Mon-Fri',
+                ], 400);
             }
             $appointment->start_time = $request->input('start_time');
             $appointment->first_name = $request->input('first_name');
