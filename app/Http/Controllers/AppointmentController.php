@@ -175,10 +175,13 @@ class AppointmentController extends Controller
             $appointment->date = $request->input('date');
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
-                    return response()->json([
-                        'status' => 'nok',
-                        'message' => 'appointment already exists',
-                    ], 400);
+                    if ($apt->id != $appointment->id) {
+                        return response()->json([
+                            'status' => 'nok',
+                            'message' => 'appointment already exists',
+                        ], 400);
+                    }
+                    //the same user can update a previous appointment without the need of changing the appointment hour
                 }
             }
             $dayNum = Carbon::parse($appointment->date)->dayOfWeek;
