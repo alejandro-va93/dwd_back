@@ -19,7 +19,7 @@ class AppointmentController extends Controller
             $apts = Appointment::all();
             if ($apts->isEmpty()) {
                 return response()->json([
-                    'status' => 200,
+                    'status' => 'ok',
                     'data' => [],
                 ], 200);
             }
@@ -37,11 +37,11 @@ class AppointmentController extends Controller
                 ];
             }
             return response()->json([
-                'status' => 200,
+                'status' => 'ok',
                 'data' => $data,
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 400], 400);
+            return response()->json(['status' => 'nok'], 400);
         }
     }
 
@@ -66,22 +66,24 @@ class AppointmentController extends Controller
         try {
             $appointment = new Appointment;
             $appointment->date = $request->input('date');
+            $appointment->start_time = $request->input('start_time');
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
-                    return response()->json([
-                        'status' => 400,
-                        'message' => 'appointment already exists',
-                    ], 400);
+                    if ($apt->start_time == $appointment->start_time) {
+                        return response()->json([
+                            'status' => 'nok',
+                            'message' => 'appointment already exists',
+                        ], 400);
+                    }
                 }
             }
             $dayNum = Carbon::parse($appointment->date)->dayOfWeek;
             if ($dayNum == 0 || $dayNum == 6) {
                 return response()->json([
-                    'status' => 400,
+                    'status' => 'nok',
                     'message' => 'appointment day must be between Mon-Fri',
                 ], 400);
             }
-            $appointment->start_time = $request->input('start_time');
             $allowedHrs = [
                 '09:00',
                 '10:00',
@@ -92,7 +94,6 @@ class AppointmentController extends Controller
                 '15:00',
                 '16:00',
                 '17:00',
-                '18:00',
             ];
             $bool = false;
             foreach ($allowedHrs as $hr) {
@@ -102,7 +103,7 @@ class AppointmentController extends Controller
             }
             if ($bool != true) {
                 return response()->json([
-                    'status' => 400,
+                    'status' => 'nok',
                     'message' => 'appointment must be between 09:00 and 18:00 hrs',
                 ], 400);
             }
@@ -112,12 +113,12 @@ class AppointmentController extends Controller
             $appointment->email = $request->input('email');
             $appointment->save();
             return response()->json([
-                'status' => 200,
+                'status' => 'ok',
                 'message' => 'appointment created successfully',
                 'id' => $appointment->id,
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 400], 400);
+            return response()->json(['status' => 'nok'], 400);
         }
 
     }
@@ -130,25 +131,41 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
-        try {
-            $appointment = Appointment::findOrFail($id);
-            $data = [
-                'id' => $appointment->id,
-                'date' => $appointment->date,
-                'start_time' => $appointment->start_time,
-                'contact_info' => [
-                    'first_name' => $appointment->first_name,
-                    'last_name' => $appointment->last_name,
-                    'email' => $appointment->email,
-                ],
-            ];
-            return response()->json([
-                'status' => 200,
-                'data' => $data,
-            ], 200);
-        } catch (\Throwable$th) {
-            return response()->json(['status' => 400], 400);
+        if (str_contains($id, '-')) {
+            try {
+                $data = Appointment::where('date', $id)->get();
+                if ($data->isEmpty()) {
+                    return throw 'error';
+                }
+                return response()->json([
+                    "status" => 'ok',
+                    "data" => $data,
+                ], 200);
+            } catch (\Throwable$th) {
+                return response()->json(['status' => 'nok'], 400);
+            }
+        } else {
+            try {
+                $appointment = Appointment::findOrFail($id);
+                $data = [
+                    'id' => $appointment->id,
+                    'date' => $appointment->date,
+                    'start_time' => $appointment->start_time,
+                    'contact_info' => [
+                        'first_name' => $appointment->first_name,
+                        'last_name' => $appointment->last_name,
+                        'email' => $appointment->email,
+                    ],
+                ];
+                return response()->json([
+                    'status' => 'ok',
+                    'data' => $data,
+                ], 200);
+            } catch (\Throwable$th) {
+                return response()->json(['status' => 'nok'], 400);
+            }
         }
+
     }
 
     /**
@@ -174,25 +191,27 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::findOrFail($id);
             $appointment->date = $request->input('date');
+            $appointment->start_time = $request->input('start_time');
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
-                    if ($apt->id != $appointment->id) {
-                        return response()->json([
-                            'status' => 400,
-                            'message' => 'appointment already exists',
-                        ], 400);
+                    if ($apt->start_time == $appointment->start_time) {
+                        if ($apt->id != $appointment->id) {
+                            return response()->json([
+                                'status' => 'nok',
+                                'message' => 'appointment already exists',
+                            ], 400);
+                        }
+                        //the same user can update a previous appointment without the need of changing the appointment hour
                     }
-                    //the same user can update a previous appointment without the need of changing the appointment hour
                 }
             }
             $dayNum = Carbon::parse($appointment->date)->dayOfWeek;
             if ($dayNum == 0 || $dayNum == 6) {
                 return response()->json([
-                    'status' => 400,
+                    'status' => 'nok',
                     'message' => 'appointment day must be between monday and friday',
                 ], 400);
             }
-            $appointment->start_time = $request->input('start_time');
             $allowedHrs = [
                 '09:00',
                 '10:00',
@@ -203,7 +222,6 @@ class AppointmentController extends Controller
                 '15:00',
                 '16:00',
                 '17:00',
-                '18:00',
             ];
             $bool = false;
             foreach ($allowedHrs as $hr) {
@@ -213,7 +231,7 @@ class AppointmentController extends Controller
             }
             if ($bool != true) {
                 return response()->json([
-                    'status' => 400,
+                    'status' => 'nok',
                     'message' => 'appointment must be between 09:00 and 18:00 hrs',
                 ], 400);
             }
@@ -223,13 +241,13 @@ class AppointmentController extends Controller
             $appointment->email = $request->input('email');
             $appointment->save();
             return response()->json([
-                'status' => 200,
+                'status' => 'ok',
                 'message' => 'appointment updated successfully',
                 'id' => $appointment->id,
             ], 200);
 
         } catch (\Throwable$th) {
-            return response()->json(['status' => 400], 400);
+            return response()->json(['status' => 'nok'], 400);
         }
     }
 
@@ -245,11 +263,11 @@ class AppointmentController extends Controller
             $appointment = Appointment::findOrFail($id);
             $appointment->delete();
             return response()->json([
-                'status' => 200,
+                'status' => 'ok',
                 'message' => 'appointment deleted successfully',
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 400], 400);
+            return response()->json(['status' => 'nok'], 400);
         }
     }
 }
