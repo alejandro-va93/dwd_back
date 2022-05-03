@@ -67,12 +67,22 @@ class AppointmentController extends Controller
             $appointment = new Appointment;
             $appointment->date = $request->input('date');
             $appointment->start_time = $request->input('start_time');
+            $appointment->first_name = $request->input('first_name');
+            $appointment->last_name = $request->input('last_name');
+            $appointment->phone_number = $request->input('phone_number');
+            $appointment->email = $request->input('email');
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
+                    if ($apt->first_name == $appointment->first_name && $apt->last_name == $appointment->last_name) {
+                        return response()->json([
+                            'status' => 'nok',
+                            'message' => 'User can have only one appointment per day',
+                        ], 400);
+                    }
                     if ($apt->start_time == $appointment->start_time) {
                         return response()->json([
                             'status' => 'nok',
-                            'message' => 'appointment already exists',
+                            'message' => 'Appointment already exists',
                         ], 400);
                     }
                 }
@@ -81,7 +91,7 @@ class AppointmentController extends Controller
             if ($dayNum == 0 || $dayNum == 6) {
                 return response()->json([
                     'status' => 'nok',
-                    'message' => 'appointment day must be between Mon-Fri',
+                    'message' => 'Appointment day must be between Monday and Friday',
                 ], 400);
             }
             $allowedHrs = [
@@ -104,17 +114,13 @@ class AppointmentController extends Controller
             if ($bool != true) {
                 return response()->json([
                     'status' => 'nok',
-                    'message' => 'appointment must be between 09:00 and 18:00 hrs',
+                    'message' => 'Appointment must be between 09:00 and 18:00 hrs',
                 ], 400);
             }
-            $appointment->first_name = $request->input('first_name');
-            $appointment->last_name = $request->input('last_name');
-            $appointment->phone_number = $request->input('phone_number');
-            $appointment->email = $request->input('email');
             $appointment->save();
             return response()->json([
                 'status' => 'ok',
-                'message' => 'appointment created successfully',
+                'message' => 'Appointment created successfully',
                 'id' => $appointment->id,
             ], 200);
         } catch (\Throwable$th) {
@@ -192,13 +198,17 @@ class AppointmentController extends Controller
             $appointment = Appointment::findOrFail($id);
             $appointment->date = $request->input('date');
             $appointment->start_time = $request->input('start_time');
+            $appointment->first_name = $request->input('first_name');
+            $appointment->last_name = $request->input('last_name');
+            $appointment->phone_number = $request->input('phone_number');
+            $appointment->email = $request->input('email');
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
                     if ($apt->start_time == $appointment->start_time) {
                         if ($apt->id != $appointment->id) {
                             return response()->json([
                                 'status' => 'nok',
-                                'message' => 'appointment already exists',
+                                'message' => 'Appointment already exists',
                             ], 400);
                         }
                         //the same user can update a previous appointment without the need of changing the appointment hour
@@ -209,7 +219,7 @@ class AppointmentController extends Controller
             if ($dayNum == 0 || $dayNum == 6) {
                 return response()->json([
                     'status' => 'nok',
-                    'message' => 'appointment day must be between monday and friday',
+                    'message' => 'Appointment day must be between Monday and Friday',
                 ], 400);
             }
             $allowedHrs = [
@@ -232,17 +242,13 @@ class AppointmentController extends Controller
             if ($bool != true) {
                 return response()->json([
                     'status' => 'nok',
-                    'message' => 'appointment must be between 09:00 and 18:00 hrs',
+                    'message' => 'Appointment must be between 09:00 and 18:00 hrs',
                 ], 400);
             }
-            $appointment->first_name = $request->input('first_name');
-            $appointment->last_name = $request->input('last_name');
-            $appointment->phone_number = $request->input('phone_number');
-            $appointment->email = $request->input('email');
             $appointment->save();
             return response()->json([
                 'status' => 'ok',
-                'message' => 'appointment updated successfully',
+                'message' => 'Appointment updated successfully',
                 'id' => $appointment->id,
             ], 200);
 
@@ -264,7 +270,7 @@ class AppointmentController extends Controller
             $appointment->delete();
             return response()->json([
                 'status' => 'ok',
-                'message' => 'appointment deleted successfully',
+                'message' => 'Appointment deleted successfully',
             ], 200);
         } catch (\Throwable$th) {
             return response()->json(['status' => 'nok'], 400);
