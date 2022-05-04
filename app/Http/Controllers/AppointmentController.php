@@ -41,7 +41,7 @@ class AppointmentController extends Controller
                 'data' => $data,
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 'nok'], 400);
+            return response()->json(['status' => 400], 400);
         }
     }
 
@@ -77,13 +77,13 @@ class AppointmentController extends Controller
                         return response()->json([
                             'status' => 'nok',
                             'message' => 'User can have only one appointment per day',
-                        ], 400);
+                        ], 200);
                     }
                     if ($apt->start_time == $appointment->start_time) {
                         return response()->json([
                             'status' => 'nok',
                             'message' => 'Appointment already exists',
-                        ], 400);
+                        ], 200);
                     }
                 }
             }
@@ -92,7 +92,7 @@ class AppointmentController extends Controller
                 return response()->json([
                     'status' => 'nok',
                     'message' => 'Appointment day must be between Monday and Friday',
-                ], 400);
+                ], 200);
             }
             $allowedHrs = [
                 '09:00',
@@ -115,7 +115,7 @@ class AppointmentController extends Controller
                 return response()->json([
                     'status' => 'nok',
                     'message' => 'Appointment must be between 09:00 and 18:00 hrs',
-                ], 400);
+                ], 200);
             }
             $appointment->save();
             return response()->json([
@@ -124,7 +124,7 @@ class AppointmentController extends Controller
                 'id' => $appointment->id,
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 'nok'], 400);
+            return response()->json(['status' => 400], 400);
         }
 
     }
@@ -148,7 +148,7 @@ class AppointmentController extends Controller
                     "data" => $data,
                 ], 200);
             } catch (\Throwable$th) {
-                return response()->json(['status' => 'nok'], 400);
+                return response()->json(['status' => 400], 400);
             }
         } else {
             try {
@@ -168,7 +168,7 @@ class AppointmentController extends Controller
                     'data' => $data,
                 ], 200);
             } catch (\Throwable$th) {
-                return response()->json(['status' => 'nok'], 400);
+                return response()->json(['status' => 400], 400);
             }
         }
 
@@ -209,7 +209,7 @@ class AppointmentController extends Controller
                             return response()->json([
                                 'status' => 'nok',
                                 'message' => 'Appointment already exists',
-                            ], 400);
+                            ], 200);
                         }
                         //the same user can update a previous appointment without the need of changing the appointment hour
                     }
@@ -220,7 +220,7 @@ class AppointmentController extends Controller
                 return response()->json([
                     'status' => 'nok',
                     'message' => 'Appointment day must be between Monday and Friday',
-                ], 400);
+                ], 200);
             }
             $allowedHrs = [
                 '09:00',
@@ -243,7 +243,7 @@ class AppointmentController extends Controller
                 return response()->json([
                     'status' => 'nok',
                     'message' => 'Appointment must be between 09:00 and 18:00 hrs',
-                ], 400);
+                ], 200);
             }
             $appointment->save();
             return response()->json([
@@ -253,7 +253,7 @@ class AppointmentController extends Controller
             ], 200);
 
         } catch (\Throwable$th) {
-            return response()->json(['status' => 'nok'], 400);
+            return response()->json(['status' => 400], 400);
         }
     }
 
@@ -273,7 +273,7 @@ class AppointmentController extends Controller
                 'message' => 'Appointment deleted successfully',
             ], 200);
         } catch (\Throwable$th) {
-            return response()->json(['status' => 'nok'], 400);
+            return response()->json(['status' => 400], 400);
         }
     }
 }
