@@ -67,10 +67,23 @@ class AppointmentController extends Controller
             $appointment = new Appointment;
             $appointment->date = $request->input('date');
             $appointment->start_time = $request->input('start_time');
-            $appointment->first_name = $request->input('first_name');
-            $appointment->last_name = $request->input('last_name');
+            $appointment->first_name = trim($request->input('first_name'));
+            $appointment->last_name = trim($request->input('last_name'));
             $appointment->phone_number = $request->input('phone_number');
-            $appointment->email = $request->input('email');
+            $appointment->email = trim($request->input('email'));
+            if (!str_contains($appointment->email, '@')) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'Enter a valid email address',
+                ], 200);
+            }
+            $num_length = strlen((string) $appointment->phone_number);
+            if ($num_length != 9) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'Enter a 9 digit phone number',
+                ], 200);
+            };
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
                     if ($apt->first_name == $appointment->first_name && $apt->last_name == $appointment->last_name) {
@@ -198,10 +211,23 @@ class AppointmentController extends Controller
             $appointment = Appointment::findOrFail($id);
             $appointment->date = $request->input('date');
             $appointment->start_time = $request->input('start_time');
-            $appointment->first_name = $request->input('first_name');
-            $appointment->last_name = $request->input('last_name');
+            $appointment->first_name = trim($request->input('first_name'));
+            $appointment->last_name = trim($request->input('last_name'));
             $appointment->phone_number = $request->input('phone_number');
-            $appointment->email = $request->input('email');
+            $appointment->email = trim($request->input('email'));
+            if (!str_contains($appointment->email, '@')) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'Enter a valid email address',
+                ], 200);
+            }
+            $num_length = strlen((string) $appointment->phone_number);
+            if ($num_length != 9) {
+                return response()->json([
+                    'status' => 'nok',
+                    'message' => 'Enter a 9 digit phone number',
+                ], 200);
+            };
             foreach (Appointment::all() as $apt) {
                 if ($apt->date == $appointment->date) {
                     if ($apt->start_time == $appointment->start_time) {
